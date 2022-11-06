@@ -11,6 +11,9 @@
 
 </div>
 
+## Abstract
+In this work, we denoise speech samples using predetermined structural knowledge of decomposable convex optimization problems. To this end, we exploit the grouping/clustering property observed with speech spectrograms to iteratively obtain a sparse clean speech signal using a mixed norm penalty term. We build upon the Overlapping Group Shrinkage (OGS) algorithm and introduce time-frequency weights to the cost function to rid the sparse clean signal of the residual noise. These time-frequency weighting extensions are also empirically shown to effectively handle impulsive noise types. The time-frequency weights may be targeted to suppress specific noise types at desired time slices to further improve the performance of the algorithm.
+
 ## Running the code
 ### Downloading
 If you are familar with git then we can clone the repository
