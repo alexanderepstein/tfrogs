@@ -41,4 +41,13 @@ Time weighting uses the energy ratios of the signal, there are other ways to wei
 In `code/test_tfrogs.m` there is a section for creating the frequency weights. Feel free to update the filter design there to suit your needs. This may be useful for trying to extract a different target signal other than speech from your noisy signal.
 
 ## Experiments & Results
-Coming soon...
+
+Experiments were run using clean speech files from [LibriSpeech](https://www.openslr.org/12) and sampling 100 different clean speech files randomly from the set. For the noise data 5 different noise files were taken from  [MS-SNSD](https://github.com/microsoft/MS-SNSD). Each speech file is added with all the different noise files at -10 dB SNR and then is run through both OGS & TFROGS. For each algorithm we ran several values of lambda for each speech and noise combination and used the best result from each algorithm and lambda respectively. OGS used lambda values starting from 0.25 up to 5 in increments of 0.25. TFROGS used the same vector for lambda values, but scaled by 10. After the experiments completed we then took the mean SNR value for each noise file across all of the speech files as well as the variance. The data from the experiment is in the table below. 
+
+| Noise File/Algorithm | OGS SNR (db)  | TFROGS SNR (db) | Noise Type      |
+| -------------------- | ------------- | --------------- | --------------- |
+| Copy Machine         | -0.03 ± 0.18  | -0.61 ± 0.61    | Semi-Stationary |
+| Keyboard Clicks      | -0.43 ± 0.50  | 3.69 ± 0.71     | Impulsive       |
+| Munching             | -0.06 ± 0.19  | 2.31 ± 0.95     | Impulsive       |
+| Neighbor Noise       | -1.29 ± 1.07  | -5.50 ± 1.84    | Semi-Stationary |
+| Vacuum               | -0.34 ± 0.57  | -0.03 ± 0.27    | Stationary      |

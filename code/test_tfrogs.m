@@ -5,7 +5,7 @@ addpath(dir("../data").folder)
 
 % Reading in our audio files
 [clean_signal, clean_speech_rate] = audioread("../data/speech_files/sp01.wav");
-[noise_signal, noise_speech_rate] = audioread("../data/noise_files/keyboard_noise.wav");
+[noise_signal, noise_signal_rate] = audioread("../data/noise_files/keyboard_noise.wav");
 noise_signal = noise_signal'; clean_signal = clean_signal';
 
 % Ensuring noise signal length matches clean signl length through reptition
@@ -49,12 +49,12 @@ if (k ~= floor(k))
 else
     padding = 0;
 end
-tf = stft(yo, noise_speech_rate, 'Window', window, 'OverlapLength', overlap_length, 'FFTLength', fft_length);
+tf = stft(yo, noise_signal_rate, 'Window', window, 'OverlapLength', overlap_length, 'FFTLength', fft_length);
 
 %% Creating our frequency weighting 
 % For noise with varying energy across the bands
 if noise_type == "clean" || noise_type == "impulsive" || noise_type == "stationary"
-    [N, Fo, Ao, W] = firpmord([4000, 6000]/(noise_speech_rate/2), [1 0.8], [0.01, 0.01]);
+    [N, Fo, Ao, W] = firpmord([4000, 6000]/(noise_signal_rate/2), [1 0.8], [0.01, 0.01]);
     b = firpm(10, Fo, Ao, W);
     [filter_magnitudes, ~] = freqz(b, 1, size(tf, 1));
     filter_magnitudes = abs(filter_magnitudes);
@@ -66,7 +66,7 @@ frequency_weighting = repmat(filter_magnitudes, [1, size(tf, 2)]);
 %% Denoising Signal
 % Running TFROGS algorithm
 [tf_denoised, cost, weights, energy_ratios] = tfrogs(tf, K1, K2, lambda, Nit, frequency_weighting);
-denoised_signal = real(istft(tf_denoised, noise_speech_rate, 'Window', window, 'OverlapLength', overlap_length, 'FFTLength', fft_length)');
+denoised_signal = real(istft(tf_denoised, noise_signal_rate, 'Window', window, 'OverlapLength', overlap_length, 'FFTLength', fft_length)');
 
 % Undoing the padding if any was necessary
 if (padding ~= 0)
@@ -75,7 +75,7 @@ if (padding ~= 0)
 end
 
 %% Plots, SNR Readout & Playing Denoised Signal
-time = (1:length(denoised_signal))/noise_speech_rate;
+time = (1:length(denoised_signal))/noise_signal_rate;
 figure(1)
 clf;
 subplot(3,3,1);
@@ -117,19 +117,19 @@ ylim([0 size(weights, 1)])
 title ("Time & Frequency Attenutation Weighting");
 
 subplot(3, 3, 6);
-spectrogram(clean_signal, window, overlap_length, fft_length, noise_speech_rate, 'yaxis');
+spectrogram(clean_signal, window, overlap_length, fft_length, noise_signal_rate, 'yaxis');
 title("Spectrogram of Clean Signal");
 
 subplot(3, 3, 7);
-spectrogram(noisy_signal, window, overlap_length, fft_length, noise_speech_rate, 'yaxis');
+spectrogram(noisy_signal, window, overlap_length, fft_length, noise_signal_rate, 'yaxis');
 title("Spectrogram of Noisy Signal");
 
 subplot(3, 3, 8);
-spectrogram(denoised_signal, window, overlap_length, fft_length, noise_speech_rate, 'yaxis');
+spectrogram(denoised_signal, window, overlap_length, fft_length, noise_signal_rate, 'yaxis');
 title("Spectrogram of Denoised Signal");
 
 subplot(3, 3, 9);
-spectrogram(clean_signal - denoised_signal, window, overlap_length, fft_length, noise_speech_rate, 'yaxis');
+spectrogram(clean_signal - denoised_signal, window, overlap_length, fft_length, noise_signal_rate, 'yaxis');
 title("Spectrogram of Delta Between Clean & Denoised Signal");
 
 if noise_type ~= "stationary"
@@ -139,7 +139,7 @@ end
 
 figure(3)
 subplot(2, 1, 1);
-plot((1:fft_length).*(noise_speech_rate/2)/fft_length, smooth(filter_magnitudes));
+plot((1:fft_length).*(noise_signal_rate/2)/fft_length, smooth(filter_magnitudes));
 xlabel("Frequency Hz");
 ylabel("Weight");
 title("Frequency Weights")
@@ -164,4 +164,4 @@ else
     postSNR = 10*log10(sum(clean_signal(:).^2) / (sum((clean_signal(:)-denoised_signal(:)).^2)));
 end
 fprintf("SNR Pre-Denoising: %.2f SNR Post-Denoising: %.2f dB\n", preSNR, postSNR);
-sound(denoised_signal, noise_speech_rate);
+sound(denoised_signal, noise_signal_rate);
